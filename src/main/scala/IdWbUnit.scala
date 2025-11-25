@@ -87,12 +87,18 @@ class IdWbUnit(implicit val conf:Config) extends Module {
   io.exOut.bcIn.rs2 := fwd2.io.out
   io.exOut.bcIn.br_type := decoder.io.br_type
   io.exOut.wb_sel := decoder.io.wb_sel
+  io.exOut.pc4 := pIdReg.instAddr + 4.U  // PC + 4 for JAL/JALR return address
 
-  io.stall := false.B
-  when(((decoder.io.A_sel === A_RS1)&&(decoder.io.rs1 === io.exRegWriteIn.rd)) ||
-       ((decoder.io.B_sel === B_RS2)&&(decoder.io.rs2 === io.exRegWriteIn.rd))){
-    io.stall := RegNext((decoder.io.ld_type =/= LD_XXX)&&(~io.stall))
-  }
+  // Check if the instruction now in EX stage is a load (was decoded last cycle)
+  val exIsLoad = RegNext(decoder.io.ld_type =/= LD_XXX, false.B)
+
+  // Check for RAW hazard: current instruction uses a register that EX stage is writing
+  val rs1Hazard = (decoder.io.rs1 === io.exRegWriteIn.rd) && io.exRegWriteIn.rd.orR && io.exRegWriteIn.writeEnable
+  val rs2Hazard = (decoder.io.rs2 === io.exRegWriteIn.rd) && io.exRegWriteIn.rd.orR && io.exRegWriteIn.writeEnable
+
+  // Need to stall if EX has a load AND current instruction reads that register
+  // This covers ALU inputs, branch comparisons, and store data
+  io.stall := (rs1Hazard || rs2Hazard) && exIsLoad
 
   when(io.stall){
     io.memOut.st_type := ST_XXX

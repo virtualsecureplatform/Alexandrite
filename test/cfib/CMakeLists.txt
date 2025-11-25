@@ -10,5 +10,5 @@ file(COPY ../util.S DESTINATION .)
 add_custom_command(
   TARGET cfibtest
   PRE_BUILD
-  COMMAND riscv32-unknown-elf-gcc -O2 util.S *.c -nostdlib -T link.ld
+  COMMAND riscv32-unknown-elf-gcc -march=rv32i -mabi=ilp32 -O2 util.S *.c -nostdlib -T link.ld
 )

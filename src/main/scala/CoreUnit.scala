@@ -34,7 +34,6 @@ class CoreUnit(implicit val conf:Config) extends Module {
   exUnit.io.wbIn := idwbUnit.io.wbOut
   exUnit.io.flush := exUnit.io.out.jump
   exUnit.io.enable := true.B
-  exUnit.io.PC4 := ifUnit.io.ifPort.out.instAddr
 
   memUnit.io.memPort.in := exUnit.io.memOut
   memUnit.io.memPort.wbIn := exUnit.io.wbOut

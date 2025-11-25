@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     ELFIO::elfio reader;
     reader.load("a.out");
     int index = 0;
-    const ELFIO::segment* psec = reader.segments[0];
+    const ELFIO::segment* psec = reader.segments[1];
     const char* p = psec->get_data();
     std::cout<<psec->get_file_size()<<std::endl;
     while(index<psec->get_file_size()){

@@ -8,8 +8,6 @@ class ExUnitPort(implicit val conf:Config) extends Bundle {
   val enable = Input(Bool())
   val flush = Input(Bool())
 
-  val PC4 = Input(UInt(conf.instAddrWidth.W))
-
   val out = new ExUnitOut
   val memOut = Output(new MemUnitIn)
   val wbOut = Output(new WbUnitIn)
@@ -22,6 +20,7 @@ class ExUnitIn(implicit val conf:Config) extends Bundle {
   val bcIn = new BrCondIn
 
   val wb_sel = UInt(2.W)
+  val pc4 = UInt(conf.instAddrWidth.W)  // PC + 4 for JAL/JALR return address
 }
 
 class ExUnitOut(implicit val conf:Config) extends Bundle {
@@ -63,7 +62,7 @@ class ExUnit(implicit val conf:Config) extends Module {
   io.memOut.exres := alu.io.out.sum
 
   io.wbOut := pWbReg
-  io.wbOut.regfilewrite.writeData := Mux(pExReg.wb_sel===WB_PC4,io.PC4,io.out.res)
+  io.wbOut.regfilewrite.writeData := Mux(pExReg.wb_sel===WB_PC4,pExReg.pc4,io.out.res)
 
   io.out.jump := brcond.io.jump || (pExReg.wb_sel===WB_PC4)
   brcond.io.in := pExReg.bcIn

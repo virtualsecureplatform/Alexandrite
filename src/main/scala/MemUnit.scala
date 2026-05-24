@@ -1,5 +1,5 @@
 import chisel3._
-import chisel3.util.MuxLookup
+import chisel3.util.{Cat, MuxLookup}
 
 import Control._
 
@@ -29,7 +29,11 @@ class MemUnit(implicit val conf:Config) extends Module {
 
   io.ramPort.addr := pMemReg.exres
 
-  io.ramPort.writeData := MuxLookup(pMemReg.st_type,DontCare,Seq(ST_SW->pMemReg.data,ST_SH->(pMemReg.data(16,0)<<(16.U*pMemReg.exres(1))),ST_SB->(pMemReg.data(8,0)<<(8.U*pMemReg.exres(1,0)))))
+  val byteShift = pMemReg.exres(1, 0) << 3
+  val halfShift = Cat(pMemReg.exres(1), 0.U(4.W))
+  val storeHalf = (pMemReg.data(15, 0) << halfShift)(31, 0)
+  val storeByte = (pMemReg.data(7, 0) << byteShift)(31, 0)
+  io.ramPort.writeData := MuxLookup(pMemReg.st_type,DontCare,Seq(ST_SW->pMemReg.data,ST_SH->storeHalf,ST_SB->storeByte))
   io.ramPort.writeEnable := MuxLookup(pMemReg.st_type,DontCare,Seq(ST_SW->"b1111".U,ST_SH->Mux(pMemReg.exres(1),"b1100".U,"b0011".U),ST_SB->(1.U<<pMemReg.exres(1,0))))
 
   io.memPort.wbout := pWbReg

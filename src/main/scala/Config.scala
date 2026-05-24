@@ -1,10 +1,10 @@
 
 case class Config() {
-    var debugIf = true
-    var debugId = true
-    var debugEx = true
-    var debugMem = true
-    var debugWb = true
+    var debugIf = false
+    var debugId = false
+    var debugEx = false
+    var debugMem = false
+    var debugWb = false
 
     var test = false
     var testRom:Seq[BigInt] = Seq(BigInt(0))
@@ -16,7 +16,7 @@ case class Config() {
     val regBit = 5
 
     //IF Unit
-    val romAddrWidth = 12-3
+    val romAddrWidth = 10
     val romDataWidth = dataWidth
 
     val instAddrWidth = romAddrWidth+2

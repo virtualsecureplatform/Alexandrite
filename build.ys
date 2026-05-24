@@ -1,8 +1,8 @@
-# read design 
-read_verilog CoreUnit.v
+# read design
+read_verilog AlexandriteKVSP.v
 
 # elaborate design hierarchy
-hierarchy -check -top CoreUnit
+hierarchy -check -top AlexandriteKVSP
 
 # the high-level stuff
 proc; opt; fsm; opt; memory; opt
@@ -10,16 +10,20 @@ proc; opt; fsm; opt; memory; opt
 # mapping to internal cell library
 techmap; opt; 
 
-dfflegalize -cell $_DFF_P_ 01
+# To make the JSON easy for Iyokan to parse, keep only the top module.
+flatten;
 
 # mapping logic to gates.
 abc -g gates,MUX
 
+dfflegalize -cell $_DFF_P_ 01
+
 # cleanup
+opt_expr; opt_clean
 clean -purge
 
 # write synthesized design
-write_json circuit.json
+write_json alexandrite-core.json
 
 # Print statistics
 stat

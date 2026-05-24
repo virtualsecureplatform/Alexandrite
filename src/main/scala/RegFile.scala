@@ -28,7 +28,7 @@ class RegFileIO(implicit val conf:Config)  extends Bundle {
 
 class RegFile(implicit val conf:Config) extends Module {
   val io = IO(new RegFileIO)
-  val regs = Mem(1<<conf.regBit, UInt(conf.dataWidth.W))
+  val regs = RegInit(VecInit(Seq.fill(1 << conf.regBit)(0.U(conf.dataWidth.W))))
   io.readport.rs1data := Mux(io.readport.rs1.orR, regs(io.readport.rs1), 0.U)
   io.readport.rs2data := Mux(io.readport.rs2.orR, regs(io.readport.rs2), 0.U)
   when(io.writeport.writeEnable & io.writeport.rd.orR) {
